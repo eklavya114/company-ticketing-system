@@ -17,6 +17,7 @@ const allowedOrigins = [
     'http://localhost:5174',
     'http://localhost:5173',
     'https://ctssilverspace.vercel.app',
+    'https://company-ticketing-system.vercel.app',
     process.env.FRONTEND_URL
 ].filter(Boolean);
 
