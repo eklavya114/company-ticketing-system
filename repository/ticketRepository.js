@@ -20,6 +20,10 @@ class TicketRepository {
   async updateById(ticketId, updateData) {
     return Ticket.findByIdAndUpdate(ticketId, updateData, { new: true });
   }
+
+  async findByClientId(clientId) {
+    return Ticket.find({ clientID: clientId }).sort({ createdAt: -1 });
+  }
 }
 
 module.exports = new TicketRepository();

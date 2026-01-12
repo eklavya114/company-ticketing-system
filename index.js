@@ -1,6 +1,7 @@
 const express=require('express');
 const app=express();
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const userRoutes = require('./routes/userRoute');
 const ticketRoutes = require('./routes/ticketRoutes');
 const compilenceRoutes =require('./routes/compilenceRoute');
@@ -12,6 +13,14 @@ const port=3123;
 app.get('/',(req,res)=>{
     res.send('Hello World!');
 });
+
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:5174',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

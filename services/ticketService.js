@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const ticketRepository = require('../repository/ticketRepository');
+const DepartmentAssignment = require('../model/ComplianceModel');
 
 class TicketService {
   /**
@@ -92,6 +93,26 @@ const hasOpenTicket = reopenticketStatus.some(
    */
   async getTicketHistory(referenceId) {
     return ticketRepository.findByReferenceId(referenceId);
+  }
+
+  /**
+   * Get all tickets for a client
+   */
+  async getClientTickets(clientId) {
+    return ticketRepository.findByClientId(clientId);
+  }
+
+  /**
+   * Get ticket by ID with assignments
+   */
+  async getTicketById(ticketId) {
+    const ticket = await ticketRepository.findById(ticketId);
+    if (!ticket) {
+      throw new Error('Ticket not found');
+    }
+    
+    const assignments = await DepartmentAssignment.find({ ticket_id: ticketId });
+    return { ticket, assignments };
   }
 }
 

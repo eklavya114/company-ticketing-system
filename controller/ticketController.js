@@ -73,6 +73,45 @@ class TicketController {
       });
     }
   }
+
+  /**
+   * GET /tickets/my-tickets
+   * Get all tickets for the current client
+   */
+  async getMyTickets(req, res) {
+    try {
+      const tickets = await ticketService.getClientTickets(req.user.id);
+
+      return res.status(200).json({
+        count: tickets.length,
+        tickets
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /tickets/:ticketId
+   * Get a single ticket by ID with assignments
+   */
+  async getTicketById(req, res) {
+    try {
+      const { ticketId } = req.params;
+      const result = await ticketService.getTicketById(ticketId);
+
+      return res.status(200).json({
+        ticket: result.ticket,
+        assignments: result.assignments
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message
+      });
+    }
+  }
 }
 
 module.exports = new TicketController();

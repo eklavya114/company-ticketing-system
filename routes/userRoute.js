@@ -13,6 +13,7 @@ router.put('/auth/update/:id',jwtauth.authenticateToken ,UserRouter.update);
 router.get('/auth/get/:id',jwtauth.authenticateToken, UserRouter.getById); 
 
 router.post('/login', userloginController.login);
+router.post('/logout',jwtauth.authenticateToken, userloginController.logout);
 router.post('/auth/logout',jwtauth.authenticateToken, userloginController.logout);
 router.post('/auth/token',jwtauth.authenticateToken, userloginController.accessTokenGenerator);
 

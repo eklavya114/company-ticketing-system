@@ -25,4 +25,17 @@ router.get(
   (req, res) => ticketController.getTicketHistory(req, res)
 );
 
+router.get(
+  '/tickets/my-tickets',
+  authenticateToken,
+  clientOnly,
+  (req, res) => ticketController.getMyTickets(req, res)
+);
+
+router.get(
+  '/tickets/:ticketId',
+  authenticateToken,
+  (req, res) => ticketController.getTicketById(req, res)
+);
+
 module.exports = router;
