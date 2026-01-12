@@ -25,16 +25,14 @@ app.get('/', (req, res) => {
     res.send('Vizva CTS API is running!');
 });
 
-// CORS configuration
+// CORS configuration - use simple array for reliable preflight handling
 app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (mobile apps, curl, etc)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-        return callback(new Error('Not allowed by CORS'));
-    },
+    origin: [
+        'http://localhost:5174',
+        'http://localhost:5173',
+        'https://ctssilverspace.vercel.app',
+        'https://company-ticketing-system.vercel.app'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
