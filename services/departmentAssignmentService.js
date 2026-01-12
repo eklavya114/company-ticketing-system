@@ -1,5 +1,6 @@
 const assignmentRepo = require('../repository/departmentAssignmentRepository');
 const User = require('../model/usermodel');
+const auditService = require('./auditService');
 
 class DepartmentAssignmentService {
   async assignTeamLead(assignmentId, teamLeadId, managerUser) {
@@ -28,10 +29,15 @@ class DepartmentAssignmentService {
       throw new Error('Team lead belongs to a different marketing branch');
     }
 
-    return assignmentRepo.assignTeamLead(
+    const updatedAssignment = await assignmentRepo.assignTeamLead(
       assignmentId,
       teamLeadId
     );
+
+    // 📝 AUDIT: Log team lead assignment
+    await auditService.logTeamLeadAssigned(assignment, teamLeadId, managerUser.id);
+
+    return updatedAssignment;
   }
 
   async getManagerAssignments(managerUser) {
@@ -45,3 +51,4 @@ class DepartmentAssignmentService {
 }
 
 module.exports = new DepartmentAssignmentService();
+

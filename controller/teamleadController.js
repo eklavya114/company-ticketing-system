@@ -16,7 +16,7 @@ class TeamLeadController {
 
   async updateStatus(req, res) {
     try {
-      const { status } = req.body;
+      const { status, reviewNotes } = req.body;
 
       if (!status) {
         return res.status(400).json({
@@ -27,7 +27,9 @@ class TeamLeadController {
       const updatedAssignment =
         await teamLeadService.updateAssignmentStatus(
           req.assignment,
-          status
+          status,
+          req.user.id,
+          reviewNotes || null
         );
 
       return res.status(200).json({

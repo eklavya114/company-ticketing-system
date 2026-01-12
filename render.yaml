@@ -1,0 +1,16 @@
+# Render deployment configuration
+services:
+  - type: web
+    name: vizva-cts-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        value: https://ctssilverspace.vercel.app

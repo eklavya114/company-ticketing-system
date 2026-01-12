@@ -35,9 +35,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await api.post('/user/auth/logout');
-    setUser(null);
-    localStorage.removeItem('cts_user');
+    try {
+      await api.post('/user/auth/logout');
+    } catch (err) {
+      console.warn('Logout API failed, forcing client logout', err);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('cts_user');
+      // Clear cookies client-side if possible, though HttpOnly makes this hard.
+      // But clearing state and local storage is usually enough for UI.
+    }
   };
 
   return (

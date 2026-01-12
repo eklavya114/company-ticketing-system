@@ -1,67 +1,50 @@
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
 import { useAuth } from '../auth/AuthContext';
-
-// TEMP: comment these if not created yet
-// import ClientDashboard from './client/ClientDashboard';
-// import ComplianceDashboard from './compliance/ComplianceDashboard';
-// import ManagerDashboard from './manager/ManagerDashboard';
-// import TeamLeadDashboard from './teamlead/TeamLeadDashboard';
+import ClientDashboard from './client/ClientDashboard';
+import ComplianceQueue from './compliance/ComplianceQueue';
+import ManagerAssignments from './manager/ManagerAssignments';
+import TeamLeadAssignments from './teamlead/TeamLeadAssignments';
+import { GlassCard } from '../components/ui/GlassCard';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // 🔒 HARD GUARD
   if (!user) {
-    return <div className="p-6">Loading user...</div>;
+    return <div className="text-center py-20 text-slate-400">Loading user profile...</div>;
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">
-          Welcome, {user.name || 'User'}
-        </h1>
-
-        <button
-          onClick={async () => {
-            await logout();
-            navigate('/login');
-          }}
-          className="btn-secondary"
-        >
-          Logout
-        </button>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+            Welcome back, {user.name}
+          </h1>
+          <p className="text-slate-400 mt-1">
+            {user.role === 'CLIENT' && 'Client Portal'}
+            {user.role === 'SUPER_ADMIN' && 'Compliance Administration'}
+            {user.role === 'ADMIN' && 'Department Management'}
+            {user.role === 'USER' && 'Technical Dashboard'}
+          </p>
+        </div>
+        <div className="bg-white/5 px-4 py-2 rounded-lg border border-white/10 text-sm text-slate-300">
+          {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        </div>
       </div>
 
-      <div className="glass p-4 rounded-xl flex flex-wrap gap-3">
-        <Link to="/" className="btn-secondary">Home</Link>
+      <div className="mt-8">
+        {user.role === 'CLIENT' && <ClientDashboard />}
+        {user.role === 'SUPER_ADMIN' && <ComplianceQueue />}
+        {user.role === 'ADMIN' && <ManagerAssignments />}
+        {user.role === 'USER' && <TeamLeadAssignments />}
 
-        {user.role === 'CLIENT' && (
-          <>
-            <Link to="/client/create" className="btn-primary">Create Ticket</Link>
-            <Link to="/client/tickets" className="btn-secondary">My Tickets</Link>
-          </>
-        )}
-
-        {user.role === 'SUPER_ADMIN' && (
-          <Link to="/compliance" className="btn-primary">Compliance Queue</Link>
-        )}
-
-        {user.role === 'ADMIN' && (
-          <Link to="/manager" className="btn-primary">Manager Assignments</Link>
-        )}
-
-        {user.role === 'USER' && (
-          <Link to="/teamlead" className="btn-primary">Team Lead Board</Link>
+        {/* Fallback for unknown roles */}
+        {!['CLIENT', 'SUPER_ADMIN', 'ADMIN', 'USER'].includes(user.role) && (
+          <GlassCard className="text-center py-12 text-slate-400">
+            Unauthorized access level. Please contact support.
+          </GlassCard>
         )}
       </div>
-
-      {/* COMMENT THESE UNTIL VERIFIED */}
-      {/* {user.role === 'CLIENT' && <ClientDashboard />} */}
-      {/* {user.role === 'SUPER_ADMIN' && <ComplianceDashboard />} */}
-      {/* {user.role === 'ADMIN' && <ManagerDashboard />} */}
-      {/* {user.role === 'USER' && <TeamLeadDashboard />} */}
     </div>
   );
 }

@@ -7,10 +7,14 @@ class TicketController {
    */
   async createTicket(req, res) {
     try {
-        console.log('Request Body:', req.user.id, req.body);
+      if (!req.user) {
+        console.error('Create Ticket: req.user is missing!');
+        return res.status(401).json({ message: 'User verification failed. Please relogin.' });
+      }
+      console.log('Request Body:', req.user.id, req.body);
       const ticket = await ticketService.createTicket(
         req.body,
-         req.user.id
+        req.user.id
       );
 
       return res.status(201).json({
@@ -34,8 +38,8 @@ class TicketController {
   async reopenTicket(req, res) {
     try {
       const { ticketId } = req.params;
-      
-        console.log('Reopen Ticket Request by User:', req.user.id, 'for Ticket ID:', ticketId);
+
+      console.log('Reopen Ticket Request by User:', req.user.id, 'for Ticket ID:', ticketId);
       const ticket = await ticketService.reopenTicket(
         ticketId,
         req.user.id

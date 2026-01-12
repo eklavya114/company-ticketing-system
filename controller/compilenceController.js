@@ -21,13 +21,32 @@ class ComplianceController {
   }
 
   /**
+   * GET /compliance/ready-to-close
+   * View tickets pending final closure with reviews
+   */
+  async getReadyToCloseQueue(req, res) {
+    try {
+      const tickets = await complianceService.getReadyToCloseQueue();
+
+      return res.status(200).json({
+        count: tickets.length,
+        tickets
+      });
+    } catch (err) {
+      return res.status(500).json({
+        message: err.message
+      });
+    }
+  }
+
+  /**
    * POST /compliance/tickets/:ticketId/approve
    * Approve ticket & assign departments
    */
   async approveTicket(req, res) {
     try {
       const { ticketId } = req.params;
-      const { departments } = req.body;
+      const { departments, decisionReason } = req.body;
 
       if (!departments || !Array.isArray(departments) || departments.length === 0) {
         return res.status(400).json({
@@ -38,7 +57,8 @@ class ComplianceController {
       const result = await complianceService.approveTicket(
         ticketId,
         departments,
-        req.user._id
+        req.user.id,
+        decisionReason || null
       );
 
       return res.status(200).json({
@@ -52,11 +72,11 @@ class ComplianceController {
     }
   }
 
-   async closeTicket(req, res) {
+  async closeTicket(req, res) {
     try {
       const { ticketId } = req.params;
 
-      const ticket = await complianceService.closeTicket(ticketId);
+      const ticket = await complianceService.closeTicket(ticketId, req.user.id);
 
       return res.status(200).json({
         message: 'Ticket closed successfully',

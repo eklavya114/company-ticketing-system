@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const ticketRepository = require('../repository/ticketRepository');
 const DepartmentAssignment = require('../model/ComplianceModel');
+const auditService = require('./auditService');
 
 class TicketService {
   /**
@@ -26,6 +27,9 @@ class TicketService {
       status: 'In Compliance Review'
     });
 
+    // 📝 AUDIT: Log ticket creation
+    await auditService.logTicketCreated(ticket, clientId, 'CLIENT');
+
     return ticket;
   }
 
@@ -38,25 +42,30 @@ class TicketService {
     if (!oldTicket) {
       throw new Error('Ticket not found');
     }
-  
+
     if (oldTicket.clientID.toString() !== clientId.toString()) {
       throw new Error('Unauthorized');
     }
-    const reopenticketStatus= await ticketRepository.findByReferenceId(oldTicket.referenceID);
-    
-const hasOpenTicket = reopenticketStatus.some(
-  ticket => ticket.status !== 'Closed'
-);
 
-    console.log('Tickets with same reference ID:', reopenticketStatus   );
-    if (oldTicket.status !== 'Closed' ) {
+    // 📝 AUDIT: Log reopen request
+    await auditService.logReopenRequested(oldTicket._id, oldTicket.referenceID, clientId);
+
+    const reopenticketStatus = await ticketRepository.findByReferenceId(oldTicket.referenceID);
+
+    const hasOpenTicket = reopenticketStatus.some(
+      ticket => ticket.status !== 'Closed'
+    );
+
+    console.log('Tickets with same reference ID:', reopenticketStatus);
+    if (oldTicket.status !== 'Closed') {
       throw new Error('Only closed tickets can be reopened');
     }
 
-    if(hasOpenTicket)   {
-        console.log('There is an open ticket in this reference group:', reopenticketStatus);
+    if (hasOpenTicket) {
+      console.log('There is an open ticket in this reference group:', reopenticketStatus);
       throw new Error('There is already an open ticket in this reference group');
     }
+
     // Count tickets in this reference group
     const totalTickets = await ticketRepository.countByReferenceId(
       oldTicket.referenceID
@@ -65,6 +74,7 @@ const hasOpenTicket = reopenticketStatus.some(
 
     const reopenCount = totalTickets - 1; // original ticket not counted as reopen
     const newReopenCount = reopenCount + 1;
+    const shouldSetWarning = newReopenCount >= 2;
 
     const sisterTicket = await ticketRepository.create({
       referenceID: oldTicket.referenceID,
@@ -77,13 +87,21 @@ const hasOpenTicket = reopenticketStatus.some(
       priority: oldTicket.priority,
 
       reopenCount: newReopenCount,
-      warningFlag: newReopenCount > 0,
+      warningFlag: shouldSetWarning,
 
       contact_email: oldTicket.contact_email,
       contact_phone: oldTicket.contact_phone,
 
       status: 'In Compliance Review'
     });
+
+    // 📝 AUDIT: Log sister ticket creation
+    await auditService.logSisterTicketCreated(sisterTicket, oldTicket._id, clientId);
+
+    // 📝 AUDIT: Log warning flag if set
+    if (shouldSetWarning) {
+      await auditService.logWarningFlagSet(sisterTicket, clientId);
+    }
 
     return sisterTicket;
   }
@@ -110,10 +128,11 @@ const hasOpenTicket = reopenticketStatus.some(
     if (!ticket) {
       throw new Error('Ticket not found');
     }
-    
+
     const assignments = await DepartmentAssignment.find({ ticket_id: ticketId });
     return { ticket, assignments };
   }
 }
 
 module.exports = new TicketService();
+

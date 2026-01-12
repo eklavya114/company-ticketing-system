@@ -46,6 +46,12 @@ const departmentAssignmentSchema = new mongoose.Schema(
       default: 'Not Assigned'
     },
 
+    // Team Lead's resolution notes/review
+    review_notes: {
+      type: String,
+      default: null
+    },
+
     resolved_at: {
       type: Date,
       default: null

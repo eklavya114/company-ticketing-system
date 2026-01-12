@@ -18,6 +18,17 @@ router.get(
 
 /**
  * Compliance only (SUPER_ADMIN)
+ * View tickets ready to close (pending final review)
+ */
+router.get(
+  '/compliance/ready-to-close',
+  authenticateToken,
+  complianceOnly,
+  (req, res) => complianceController.getReadyToCloseQueue(req, res)
+);
+
+/**
+ * Compliance only (SUPER_ADMIN)
  * Approve ticket & assign departments
  */
 router.post(
