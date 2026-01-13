@@ -28,7 +28,7 @@ export default function CreateTicket() {
       toast.success('Ticket created successfully!');
       navigate('/client/tickets');
     } catch (err) {
-      console.error("Ticket Creation Error:", err);
+      console.error("T:", err);
       const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Unknown Error';
       toast.error(msg);
     } finally {
