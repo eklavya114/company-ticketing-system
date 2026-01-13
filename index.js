@@ -12,6 +12,9 @@ const dbConfig = require('./config/db');
 // Use PORT from environment (Render sets this) or default to 3123
 const port = process.env.PORT || 3123;
 
+// Trust proxy is required for secure cookies on Render/Heroku/Vercel
+app.set('trust proxy', 1);
+
 // Allowed origins for CORS
 const allowedOrigins = [
     'http://localhost:5174',
